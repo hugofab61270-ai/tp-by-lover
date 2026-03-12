@@ -96,7 +96,427 @@ getgenv().TARGET_BRAINROTS = {
     ["Lovin Rose"] = true
 }
 task.spawn(function()
-loadstring(game:HttpGet("https://api.luarmor.net/files/v4/loaders/fbcd1d25889a843297107dea3642044d.lua"))()
+local Players = game:GetService("Players")
+local StarterGui = game:GetService("StarterGui")
+local UserInputService = game:GetService("UserInputService")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+
+local player = Players.LocalPlayer
+local lp = player
+
+local backpack = player:WaitForChild("Backpack")
+local char = player.Character or player.CharacterAdded:Wait()
+local humanoid = char:WaitForChild("Humanoid")
+local hrp = char:WaitForChild("HumanoidRootPart")
+
+player.CharacterAdded:Connect(function(c)
+    char = c
+    humanoid = c:WaitForChild("Humanoid")
+    hrp = c:WaitForChild("HumanoidRootPart")
+end)
+
+local blockDelay = 0.7
+local minDelay = 0.1
+local maxDelay = 5.0
+
+local ScreenGui = Instance.new("ScreenGui", player.PlayerGui)
+ScreenGui.Name = "VonsTeleport"
+ScreenGui.ResetOnSpawn = false
+
+local Frame = Instance.new("Frame", ScreenGui)
+Frame.Size = UDim2.new(0, 160, 0, 220)
+Frame.Position = UDim2.new(0.5, -80, 0.5, -110)
+Frame.BackgroundColor3 = Color3.fromRGB(0,0,0)
+Frame.Active = true
+Frame.Draggable = true
+Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 10)
+Instance.new("UIStroke", Frame).Color = Color3.fromRGB(255,255,255)
+
+local Title = Instance.new("TextLabel", Frame)
+Title.Size = UDim2.new(1, -20, 0, 25)
+Title.Position = UDim2.new(0, 10, 0, 8)
+Title.Text = "loverde92i Teleport"
+Title.TextColor3 = Color3.fromRGB(255,255,255)
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 12
+Title.BackgroundTransparency = 1
+Title.TextXAlignment = Enum.TextXAlignment.Center
+
+local TeleportButton = Instance.new("TextButton", Frame)
+TeleportButton.Size = UDim2.new(0, 130, 0, 25)
+TeleportButton.Position = UDim2.new(0, 15, 0, 38)
+TeleportButton.Text = "Teleport"
+TeleportButton.TextColor3 = Color3.fromRGB(0,0,0)
+TeleportButton.Font = Enum.Font.GothamBold
+TeleportButton.TextSize = 12
+TeleportButton.BackgroundColor3 = Color3.fromRGB(255,255,255)
+Instance.new("UICorner", TeleportButton).CornerRadius = UDim.new(0, 6)
+
+local KeybindButton = Instance.new("TextButton", Frame)
+KeybindButton.Size = UDim2.new(0, 130, 0, 25)
+KeybindButton.Position = UDim2.new(0, 15, 0, 68)
+KeybindButton.Text = "Keybind: [F]"
+KeybindButton.TextColor3 = Color3.fromRGB(0,0,0)
+KeybindButton.Font = Enum.Font.GothamBold
+KeybindButton.TextSize = 12
+KeybindButton.BackgroundColor3 = Color3.fromRGB(255,255,255)
+Instance.new("UICorner", KeybindButton).CornerRadius = UDim.new(0, 6)
+
+local autoBlockEnabled = true
+local AutoBlockButton = Instance.new("TextButton", Frame)
+AutoBlockButton.Size = UDim2.new(0, 130, 0, 25)
+AutoBlockButton.Position = UDim2.new(0, 15, 0, 98)
+AutoBlockButton.Font = Enum.Font.GothamBold
+AutoBlockButton.TextSize = 11
+AutoBlockButton.TextColor3 = Color3.fromRGB(0,0,0)
+Instance.new("UICorner", AutoBlockButton).CornerRadius = UDim.new(0, 6)
+
+local DelayLabel = Instance.new("TextLabel", Frame)
+DelayLabel.Size = UDim2.new(1, -20, 0, 16)
+DelayLabel.Position = UDim2.new(0, 10, 0, 128)
+DelayLabel.Text = "Delay:"
+DelayLabel.TextColor3 = Color3.fromRGB(255,255,255)
+DelayLabel.Font = Enum.Font.Gotham
+DelayLabel.TextSize = 10
+DelayLabel.BackgroundTransparency = 1
+DelayLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local DelayTextBox = Instance.new("TextBox", Frame)
+DelayTextBox.Size = UDim2.new(0, 75, 0, 20)
+DelayTextBox.Position = UDim2.new(0, 15, 0, 145)
+DelayTextBox.Text = tostring(blockDelay)
+DelayTextBox.TextColor3 = Color3.fromRGB(0,0,0)
+DelayTextBox.Font = Enum.Font.Gotham
+DelayTextBox.TextSize = 11
+DelayTextBox.BackgroundColor3 = Color3.fromRGB(255,255,255)
+DelayTextBox.PlaceholderText = "0.1-5.0"
+DelayTextBox.PlaceholderColor3 = Color3.fromRGB(150,150,150)
+Instance.new("UICorner", DelayTextBox).CornerRadius = UDim.new(0, 4)
+Instance.new("UIStroke", DelayTextBox).Color = Color3.fromRGB(100,100,100)
+
+local SetDelayButton = Instance.new("TextButton", Frame)
+SetDelayButton.Size = UDim2.new(0, 40, 0, 20)
+SetDelayButton.Position = UDim2.new(0, 100, 0, 145)
+SetDelayButton.Text = "Set"
+SetDelayButton.TextColor3 = Color3.fromRGB(0,0,0)
+SetDelayButton.Font = Enum.Font.GothamBold
+SetDelayButton.TextSize = 10
+SetDelayButton.BackgroundColor3 = Color3.fromRGB(200,200,200)
+Instance.new("UICorner", SetDelayButton).CornerRadius = UDim.new(0, 4)
+
+local BlockAllButton = Instance.new("TextButton", Frame)
+BlockAllButton.Size = UDim2.new(0, 130, 0, 25)
+BlockAllButton.Position = UDim2.new(0, 15, 0, 175)
+BlockAllButton.Text = "Block All"
+BlockAllButton.TextColor3 = Color3.fromRGB(0,0,0)
+BlockAllButton.Font = Enum.Font.GothamBold
+BlockAllButton.TextSize = 11
+BlockAllButton.BackgroundColor3 = Color3.fromRGB(255,255,255)
+Instance.new("UICorner", BlockAllButton).CornerRadius = UDim.new(0, 6)
+
+local CurrentDelayLabel = Instance.new("TextLabel", Frame)
+CurrentDelayLabel.Size = UDim2.new(1, -20, 0, 16)
+CurrentDelayLabel.Position = UDim2.new(0, 10, 0, 205)
+CurrentDelayLabel.Text = "Delay: " .. tostring(blockDelay) .. "s"
+CurrentDelayLabel.TextColor3 = Color3.fromRGB(255,255,255)
+CurrentDelayLabel.Font = Enum.Font.Gotham
+CurrentDelayLabel.TextSize = 9
+CurrentDelayLabel.BackgroundTransparency = 1
+CurrentDelayLabel.TextXAlignment = Enum.TextXAlignment.Center
+
+local ToggleCircle = Instance.new("ImageButton", ScreenGui)
+ToggleCircle.Size = UDim2.new(0, 40, 0, 40)
+ToggleCircle.Position = UDim2.new(0, 10, 0, 10)
+ToggleCircle.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+ToggleCircle.BackgroundTransparency = 0.2
+ToggleCircle.Image = "rbxassetid://6034834113"
+ToggleCircle.ImageColor3 = Color3.new(1,1,1)
+ToggleCircle.ZIndex = 10
+ToggleCircle.Active = true
+ToggleCircle.Draggable = true
+
+local ToggleCorner = Instance.new("UICorner", ToggleCircle)
+ToggleCorner.CornerRadius = UDim.new(1, 0)
+
+local ToggleStroke = Instance.new("UIStroke", ToggleCircle)
+ToggleStroke.Color = Color3.fromRGB(255, 255, 255)
+ToggleStroke.Thickness = 1
+
+ToggleCircle.MouseButton1Click:Connect(function()
+    Frame.Visible = not Frame.Visible
+    if Frame.Visible then
+        ToggleCircle.Image = "rbxassetid://6034834113"
+    else
+        ToggleCircle.Image = "rbxassetid://6034835320"
+    end
+end)
+
+local function updateAutoBlockUI()
+    if autoBlockEnabled then
+        AutoBlockButton.Text = "Auto: ON"
+        AutoBlockButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+    else
+        AutoBlockButton.Text = "Auto: OFF"
+        AutoBlockButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    end
+end
+
+local function setBlockDelay()
+    local text = DelayTextBox.Text
+    if text == "" then
+        DelayTextBox.Text = tostring(blockDelay)
+        return
+    end
+    
+    local num = tonumber(text)
+    if num then
+        if num < minDelay then
+            num = minDelay
+        elseif num > maxDelay then
+            num = maxDelay
+        end
+        
+        blockDelay = math.floor(num * 100 + 0.5) / 100
+        
+        DelayTextBox.Text = tostring(blockDelay)
+        CurrentDelayLabel.Text = "Delay: " .. tostring(blockDelay) .. "s"
+    else
+        DelayTextBox.Text = tostring(blockDelay)
+    end
+end
+
+updateAutoBlockUI()
+
+local function FastClick()
+    task.wait(blockDelay)
+    local cam = workspace.CurrentCamera.ViewportSize
+    local x = cam.X / 2
+    local y = cam.Y / 2 + 23
+
+    for _ = 1, 8 do
+        VirtualInputManager:SendMouseButtonEvent(x, y, 0, true, game, 1)
+        VirtualInputManager:SendMouseButtonEvent(x, y, 0, false, game, 1)
+        task.wait(0.008)
+    end
+end
+
+local function blockPlayer(plr)
+    if not plr or plr == player then return end
+    pcall(function()
+        StarterGui:SetCore("PromptBlockPlayer", plr)
+    end)
+end
+
+local function checkForBrainrot()
+    if not autoBlockEnabled then
+        return false
+    end
+    
+    for _, tool in ipairs(backpack:GetChildren()) do
+        if tool:IsA("Tool") then
+            local toolName = tool.Name:lower()
+            if toolName:find("brainrot") or toolName:find("animal") or 
+               toolName:find("monkey") or toolName:find("dog") or 
+               toolName:find("cat") or toolName:find("bird") then
+                
+                for _, otherPlayer in ipairs(Players:GetPlayers()) do
+                    if otherPlayer ~= player and otherPlayer.Character then
+                        local otherBackpack = otherPlayer:FindFirstChild("Backpack")
+                        if otherBackpack and not otherBackpack:FindFirstChild(tool.Name) then
+                            blockPlayer(otherPlayer)
+                            FastClick()
+                            task.wait(0.25)
+                            return true
+                        end
+                    end
+                end
+            end
+        end
+    end
+    
+    for _, tool in ipairs(char:GetChildren()) do
+        if tool:IsA("Tool") then
+            local toolName = tool.Name:lower()
+            if toolName:find("brainrot") or toolName:find("animal") or 
+               toolName:find("monkey") or toolName:find("dog") or 
+               toolName:find("cat") or toolName:find("bird") then
+                
+                for _, otherPlayer in ipairs(Players:GetPlayers()) do
+                    if otherPlayer ~= player and otherPlayer.Character then
+                        local otherBackpack = otherPlayer:FindFirstChild("Backpack")
+                        if otherBackpack and not otherBackpack:FindFirstChild(tool.Name) then
+                            blockPlayer(otherPlayer)
+                            FastClick()
+                            task.wait(0.25)
+                            return true
+                        end
+                    end
+                end
+            end
+        end
+    end
+    
+    return false
+end
+
+local function setupBrainrotDetection()
+    checkForBrainrot()
+    
+    backpack.ChildAdded:Connect(function(child)
+        if child:IsA("Tool") then
+            task.wait(0.5)
+            checkForBrainrot()
+        end
+    end)
+    
+    char.ChildAdded:Connect(function(child)
+        if child:IsA("Tool") then
+            task.wait(0.5)
+            checkForBrainrot()
+        end
+    end)
+    
+    player.CharacterAdded:Connect(function(newChar)
+        char = newChar
+        newChar.ChildAdded:Connect(function(child)
+            if child:IsA("Tool") then
+                task.wait(0.5)
+                checkForBrainrot()
+            end
+        end)
+        
+        task.wait(1)
+        checkForBrainrot()
+    end)
+end
+
+local spots = {
+    CFrame.new(-402.18, -6.34, 131.83) * CFrame.Angles(0, math.rad(-20.08), 0),
+    CFrame.new(-416.66, -6.34, -2.05) * CFrame.Angles(0, math.rad(-62.89), 0),
+    CFrame.new(-329.37, -4.68, 18.12) * CFrame.Angles(0, math.rad(-30.53), 0),
+}
+
+local REQUIRED_TOOL = "Flying Carpet"
+local teleportKey = Enum.KeyCode.F
+local waitingForKey = false
+local lastTarget = nil
+
+local function equipFlyingCarpet()
+    local tool = backpack:FindFirstChild(REQUIRED_TOOL) or char:FindFirstChild(REQUIRED_TOOL)
+    if not tool then
+        return false
+    end
+
+    if tool.Parent ~= char then
+        humanoid:EquipTool(tool)
+        repeat task.wait() until tool.Parent == char
+    end
+
+    return true
+end
+
+local function blockAllPlayers()
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr ~= player then
+            blockPlayer(plr)
+            FastClick()
+            task.wait(0.25)
+        end
+    end
+end
+
+local function teleportAll()
+    if not equipFlyingCarpet() then return end
+
+    lastTarget = nil
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr ~= player then
+            lastTarget = plr
+            break
+        end
+    end
+
+    for _, spot in ipairs(spots) do
+        equipFlyingCarpet()
+        hrp.CFrame = spot
+        task.wait(0.12)
+    end
+
+    if lastTarget and autoBlockEnabled then
+        blockPlayer(lastTarget)
+        FastClick()
+    end
+end
+
+TeleportButton.MouseButton1Click:Connect(function()
+    teleportAll()
+    if autoBlockEnabled then
+        task.wait(1)
+        checkForBrainrot()
+    end
+end)
+
+KeybindButton.MouseButton1Click:Connect(function()
+    KeybindButton.Text = "Press a key..."
+    waitingForKey = true
+end)
+
+AutoBlockButton.MouseButton1Click:Connect(function()
+    autoBlockEnabled = not autoBlockEnabled
+    updateAutoBlockUI()
+end)
+
+SetDelayButton.MouseButton1Click:Connect(setBlockDelay)
+
+DelayTextBox.FocusLost:Connect(function(enterPressed)
+    setBlockDelay()
+end)
+
+DelayTextBox:GetPropertyChangedSignal("Text"):Connect(function()
+    local text = DelayTextBox.Text
+    if text ~= "" then
+        local num = tonumber(text)
+        if num then
+            if num >= minDelay and num <= maxDelay then
+                DelayTextBox.BackgroundColor3 = Color3.fromRGB(255,255,255)
+            else
+                DelayTextBox.BackgroundColor3 = Color3.fromRGB(255,200,200)
+            end
+        else
+            DelayTextBox.BackgroundColor3 = Color3.fromRGB(255,200,200)
+        end
+    else
+        DelayTextBox.BackgroundColor3 = Color3.fromRGB(255,255,255)
+    end
+end)
+
+BlockAllButton.MouseButton1Click:Connect(blockAllPlayers)
+
+DelayTextBox.FocusLost:Connect(function(enterPressed)
+    if enterPressed then
+        setBlockDelay()
+    end
+end)
+
+DelayTextBox.FocusLost:Connect(setBlockDelay)
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+
+    if waitingForKey and input.UserInputType == Enum.UserInputType.Keyboard then
+        teleportKey = input.KeyCode
+        KeybindButton.Text = "Keybind: [" .. teleportKey.Name .. "]"
+        waitingForKey = false
+    elseif input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == teleportKey then
+        teleportAll()
+        if autoBlockEnabled then
+            task.wait(1)
+            checkForBrainrot()
+        end
+    end
+end)
+
+setupBrainrotDetection()
 end)
 task.spawn(function()
 loadstring(game:HttpGet("https://raw.githubusercontent.com/Tokinu/TP-BLOCK/refs/heads/main/GOATED"))()
